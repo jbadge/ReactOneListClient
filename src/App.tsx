@@ -14,7 +14,7 @@ export function App() {
   const [todoItems, setTodoItems] = useState<TodoItemType[]>([])
   const [newTodoText, setNewTodoText] = useState('')
 
-  useEffect(() => {
+  function loadAllTheItems() {
     async function fetchListOfItems() {
       const response = await axios.get(
         'https://one-list-api.herokuapp.com/items?access_token=cohort22'
@@ -25,7 +25,9 @@ export function App() {
       }
     }
     fetchListOfItems()
-  }, [])
+  }
+
+  useEffect(loadAllTheItems, [])
 
   async function handleCreateNewTodoItem() {
     const response = await axios.post(
@@ -35,9 +37,25 @@ export function App() {
       }
     )
     if (response.status === 201) {
-      const newTodo = response.data
-      const newTodoItems = [...todoItems, newTodo]
-      setTodoItems(newTodoItems)
+      loadAllTheItems()
+      // Appending to the list, fastest way
+      // const newTodo = response.data
+      // const newTodoItems = [...todoItems, newTodo]
+      // setTodoItems(newTodoItems)
+
+      // Refreshes the entire list again. Slows down as list gets longer
+      // Can see in real time if several people are submitting at same time
+      ///////////////////////////////////////////////
+      //// This below is essentially "loadAllTheItems"
+      ///////////////////////////////////////////////
+      // const response = await axios.get(
+      //   'https://one-list-api.herokuapp.com/items?access_token=cohort22'
+      // )
+
+      // if (response.status === 200) {
+      //   setTodoItems(response.data)
+      //   setNewTodoText('')
+      // }
     }
   }
 
@@ -50,12 +68,11 @@ export function App() {
         <ul>
           {todoItems.map(function (todoItem) {
             return (
-              <li
+              <TodoItem
                 key={todoItem.id}
-                className={todoItem.complete ? 'completed' : undefined}
-              >
-                {todoItem.text}
-              </li>
+                todoItem={todoItem}
+                reloadItems={loadAllTheItems}
+              />
             )
           })}
         </ul>
@@ -82,5 +99,31 @@ export function App() {
         <p>&copy; 2020 Suncoast Developers Guild</p>
       </footer>
     </div>
+  )
+}
+
+type TodoItemProps = {
+  todoItem: TodoItemType
+  reloadItems: () => void
+}
+
+function TodoItem(props: TodoItemProps) {
+  async function toggleCompleteStatus() {
+    const response = await axios.put(
+      `https://one-list-api.herokuapp.com/items/${props.todoItem.id}?access_token=cohort22`,
+      { item: { complete: !props.todoItem.complete } }
+    )
+    if (response.status === 200) {
+      props.reloadItems()
+    }
+  }
+  return (
+    <li
+      key={props.todoItem.id}
+      className={props.todoItem.complete ? 'completed' : undefined}
+      onClick={toggleCompleteStatus}
+    >
+      {props.todoItem.text}
+    </li>
   )
 }
