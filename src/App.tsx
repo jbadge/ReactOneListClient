@@ -35,7 +35,9 @@ export function App() {
       }
     )
     if (response.status === 201) {
-      console.log(response.data)
+      const newTodo = response.data
+      const newTodoItems = [...todoItems, newTodo]
+      setTodoItems(newTodoItems)
     }
   }
 
