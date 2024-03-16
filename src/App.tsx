@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react'
 import logo from './images/sdg-logo.png'
 import axios from 'axios'
+import { TodoItem } from './components/TodoItem'
 
-type TodoItemType = {
+export type TodoItemType = {
   id: number
   text: string
   complete: boolean
@@ -38,24 +39,6 @@ export function App() {
     )
     if (response.status === 201) {
       loadAllTheItems()
-      // Appending to the list, fastest way
-      // const newTodo = response.data
-      // const newTodoItems = [...todoItems, newTodo]
-      // setTodoItems(newTodoItems)
-
-      // Refreshes the entire list again. Slows down as list gets longer
-      // Can see in real time if several people are submitting at same time
-      ///////////////////////////////////////////////
-      //// This below is essentially "loadAllTheItems"
-      ///////////////////////////////////////////////
-      // const response = await axios.get(
-      //   'https://one-list-api.herokuapp.com/items?access_token=cohort22'
-      // )
-
-      // if (response.status === 200) {
-      //   setTodoItems(response.data)
-      //   setNewTodoText('')
-      // }
     }
   }
 
@@ -99,34 +82,5 @@ export function App() {
         <p>&copy; 2020 Suncoast Developers Guild</p>
       </footer>
     </div>
-  )
-}
-
-type TodoItemProps = {
-  todoItem: TodoItemType
-  reloadItems: () => void
-}
-
-export function TodoItem({
-  todoItem: { id, text, complete },
-  reloadItems,
-}: TodoItemProps) {
-  async function toggleCompleteStatus() {
-    const response = await axios.put(
-      `https://one-list-api.herokuapp.com/items/${id}?access_token=cohort22`,
-      { item: { complete: !complete } }
-    )
-    if (response.status === 200) {
-      reloadItems()
-    }
-  }
-  return (
-    <li
-      key={id}
-      className={complete ? 'completed' : undefined}
-      onClick={toggleCompleteStatus}
-    >
-      {text}
-    </li>
   )
 }
